@@ -3,212 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>평화여객 | PEACE TRANSPORT</title>
-    
+    <title>평화여객 | 공식 홈페이지</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
-    
     <style>
         :root {
-            --main-green: #2ECC71;
-            --sub-yellow: #F1C40F;
-            --dark-bg: #0a0a0a;
-            --card-bg: rgba(20, 20, 20, 0.8);
+            --main-green: #2ECC71; --sub-yellow: #F1C40F; --dark-bg: #121212;
+            --card-bg: rgba(30, 30, 30, 0.9); --text-white: #FFFFFF;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html { 
-            width: 100%; height: 100%; 
-            font-family: 'Pretendard', sans-serif; 
-            background-color: var(--dark-bg);
-            color: white;
-            scroll-behavior: smooth; /* 스크롤 부드럽게 */
-            overflow-x: hidden;
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Pretendard', sans-serif; background: var(--dark-bg); color: var(--text-white); }
 
-        /* 배경 레이어 */
-        #vanta-bg {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-        }
+        /* 배경 Three.js */
+        #three-canvas { position: fixed; top: 0; left: 0; z-index: -1; pointer-events: none; }
 
         /* 네비게이션 */
         nav {
-            position: fixed; top: 0; width: 100%;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 25px 50px; z-index: 1000;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            position: fixed; top: 0; width: 100%; background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(15px); padding: 20px 50px; display: flex;
+            justify-content: space-between; align-items: center; z-index: 1000;
+            box-sizing: border-box; border-bottom: 1px solid rgba(46, 204, 113, 0.1);
         }
-        .logo { 
-            font-size: 1.8rem; font-weight: 900; color: var(--main-green); 
-            text-decoration: none; letter-spacing: -1px;
-        }
-        .nav-links { list-style: none; display: flex; gap: 30px; }
-        .nav-links a { 
-            text-decoration: none; color: #fff; font-weight: 600; 
-            font-size: 0.95rem; transition: 0.3s; opacity: 0.7;
-        }
-        .nav-links a:hover { opacity: 1; color: var(--sub-yellow); }
+        .logo { font-size: 1.6rem; font-weight: 800; color: var(--main-green); cursor: pointer; text-decoration: none; }
+        .nav-links { list-style: none; display: flex; gap: 25px; margin: 0; }
+        .nav-links li { cursor: pointer; font-weight: 500; transition: 0.3s; color: #888; }
+        .nav-links li:hover, .nav-links li.active { color: var(--main-green); }
 
-        /* 섹션 공통 */
+        /* 메인 슬라이더 컨테이너 */
+        .main-wrapper {
+            display: flex; width: 400vw; /* 4개 페이지라 400% */
+            height: 100vh; transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1); /* 슉슉 넘어가는 핵심 */
+        }
+
         section {
-            width: 100vw; height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-            padding: 0 20px;
+            width: 100vw; height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 100px 50px;
+            box-sizing: border-box; flex-shrink: 0; overflow-y: auto;
         }
 
-        /* 메인 홈 디자인 */
-        .hero-content { text-align: center; }
-        .hero-title { 
-            font-size: clamp(3rem, 10vw, 6rem); font-weight: 900; 
-            line-height: 1; margin-bottom: 10px;
-            background: linear-gradient(to right, var(--main-green), var(--sub-yellow));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .hero-sub { font-size: 1.2rem; letter-spacing: 0.5rem; color: #fff; opacity: 0.8; }
-
-        /* 카드 디자인 (내용 페이지) */
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            padding: 50px; border-radius: 40px;
-            width: 100%; max-width: 900px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        /* 카드 디자인 */
+        .card {
+            background: var(--card-bg); padding: 50px; border-radius: 30px;
+            max-width: 800px; width: 100%; border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+            border-top: 4px solid var(--main-green);
         }
 
-        h2 { color: var(--main-green); font-size: 2.5rem; margin-bottom: 20px; }
-        h3 { color: var(--sub-yellow); margin-top: 25px; margin-bottom: 10px; }
-        p, li { color: #ddd; line-height: 1.8; font-size: 1.1rem; margin-bottom: 10px; }
+        h1 { font-size: 3.5rem; color: var(--main-green); margin: 0; margin-bottom: 10px; }
+        h2 { color: var(--sub-yellow); margin-top: 30px; }
+        p, li { line-height: 1.8; color: #ccc; font-size: 1.1rem; }
 
-        /* 버튼 */
-        .cta-button {
-            display: inline-block; padding: 18px 45px; border-radius: 50px;
-            background: var(--main-green); color: #000; font-weight: 800;
-            text-decoration: none; transition: 0.4s; margin-top: 30px;
-            border: none; cursor: pointer;
+        .btn {
+            display: inline-block; padding: 15px 40px; border-radius: 12px;
+            background: var(--main-green); color: #000; font-weight: bold;
+            text-decoration: none; margin-top: 25px; transition: 0.3s; border: none; cursor: pointer;
         }
-        .cta-button:hover { 
-            background: var(--sub-yellow); transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 15px 30px rgba(241, 196, 15, 0.3);
-        }
+        .btn:hover { background: var(--sub-yellow); transform: translateY(-5px); }
 
-        /* 기사 모집 배너 */
-        .recruit-popup {
-            position: fixed; bottom: 40px; right: 40px;
-            background: white; color: black; padding: 25px;
-            border-radius: 25px; z-index: 1100; font-weight: 800;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            display: flex; align-items: center; gap: 15px;
-            animation: slideUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* 팝업 */
+        #popup {
+            position: fixed; bottom: 30px; right: 30px; background: var(--main-green);
+            color: #000; padding: 20px; border-radius: 15px; font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000;
+            transform: translateY(200%); transition: 0.5s; cursor: pointer;
         }
-        @keyframes slideUp { from { transform: translateY(150%); } to { transform: translateY(0); } }
-
-        .dot { width: 12px; height: 12px; background: #ff4b2b; border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
-
-        /* 스크롤 가이드 */
-        .scroll-down {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            animation: bounce 2s infinite; opacity: 0.5;
-        }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0) translateX(-50%);} 40% {transform: translateY(-10px) translateX(-50%);} 60% {transform: translateY(-5px) translateX(-50%);} }
+        #popup.show { transform: translateY(0); }
     </style>
 </head>
 <body>
 
-    <div id="vanta-bg"></div>
-
     <nav>
-        <a href="#home" class="logo">平和旅客</a>
+        <div class="logo" onclick="movePage(0)">평화여객</div>
         <ul class="nav-links">
-            <li><a href="#about">소개</a></li>
-            <li><a href="#rules">규칙/약관</a></li>
-            <li><a href="#collab">진출제의</a></li>
+            <li class="active" onclick="movePage(0)">HOME</li>
+            <li onclick="movePage(1)">ABOUT</li>
+            <li onclick="movePage(2)">RULES</li>
+            <li onclick="movePage(3)">BUSINESS</li>
         </ul>
     </nav>
 
-    <section id="home">
-        <div class="hero-content">
-            <h1 class="hero-title">평화여객</h1>
-            <p class="hero-sub">PEACE TRANSPORT SERVICE</p>
-            <a href="#rules" class="cta-button">기사 지원하기</a>
-        </div>
-        <div class="scroll-down">▼ SCROLL</div>
-    </section>
+    <canvas id="three-canvas"></canvas>
 
-    <section id="about">
-        <div class="glass-card">
-            <h2>COMPANY</h2>
-            <p>우리는 로블록스 <strong>Ulsan Bus Driving Simulator</strong>를 기반으로 정직과 신뢰를 운송합니다. 단순한 팩션을 넘어, 유저들에게 최고의 주행 경험과 친절한 서비스를 제공합니다.</p>
-            <h3>조직도</h3>
-            <p>🟢 <strong>대표:</strong> 곰돌맨 (beargobearman)</p>
-            <p>🟡 <strong>운영진:</strong> 사내 규정 준수 및 기사 교육 관리</p>
-        </div>
-    </section>
+    <div class="main-wrapper" id="master-slider">
+        <section id="home">
+            <h1 style="font-size: 6rem; text-shadow: 0 0 30px rgba(46,204,113,0.4);">평화여객</h1>
+            <p style="color: var(--sub-yellow); font-size: 1.5rem; letter-spacing: 8px;">PEACE TRANSPORT</p>
+            <button class="btn" onclick="movePage(2)">운행 규칙 확인하기</button>
+        </section>
 
-    <section id="rules">
-        <div class="glass-card">
-            <h2>RULES & TOS</h2>
-            <h3>사내 5대 수칙</h3>
-            <ul style="padding-left: 20px;">
-                <li>신호 준수 및 정속 주행 (안전 우선)</li>
-                <li>타 유저에 대한 비하 발언 및 욕설 엄금</li>
-                <li>지정된 배차 및 노선 이탈 금지</li>
-                <li>차량 파손 시 즉시 보고</li>
-                <li>팩션 자부심 고취</li>
-            </ul>
-            <h3>이용약관</h3>
-            <p>평화여객의 구성원이 됨은 상기 수칙을 준수하고 운영진의 지시에 따를 것을 약속함을 의미합니다. 위반 시 경고 없이 제명될 수 있습니다.</p>
-            <a href="https://discord.com/channels/서버ID/기사지원채널ID" class="btn cta-button">동의하고 지원하기</a>
-        </div>
-    </section>
-
-    <section id="collab">
-        <div class="glass-card" style="text-align: center;">
-            <h2>COLLABORATION</h2>
-            <p>새로운 노선 개설이나 타 게임 진출, 팩션 제휴 등 <br> 모든 비즈니스 제안을 환영합니다.</p>
-            <div style="margin: 30px 0; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 20px;">
-                <p>문의처: 디스코드 <strong>#진출-제의</strong> 채널</p>
+        <section id="about">
+            <div class="card">
+                <h1>소개</h1>
+                <p>로블록스 울산 버스 시뮬레이터에서 가장 신뢰받는 팩션을 지향합니다.</p>
+                <h2>조직도</h2>
+                <p>🟢 대표이사: <strong>숙근우 (Suk Geun-woo)</strong></p>
+                <p>🟡 운영본부: 노선 관리 및 기사 교육 전담</p>
             </div>
-            <a href="https://discord.com/channels/서버ID/진출제의채널ID" class="cta-button" style="background: var(--sub-yellow);">문의 하러가기</a>
-        </div>
-    </section>
+        </section>
 
-    <div class="recruit-popup">
-        <div class="dot"></div>
-        <span>신입 기사 모집 중</span>
-        <a href="#rules" style="color: var(--main-green); text-decoration: none; margin-left: 10px;">[확인]</a>
+        <section id="rules">
+            <div class="card">
+                <h1>규칙 및 이용약관</h1>
+                <h2>📌 기사 수칙</h2>
+                <ul>
+                    <li>난폭 운전 금지 및 신호 준수</li>
+                    <li>승객 및 타 팩션 기사에게 항상 예의 준수</li>
+                    <li>무단 결근 시 경고 조치</li>
+                </ul>
+                <h2>📌 이용약관</h2>
+                <p>본 팩션 가입 시 평화여객의 모든 사내 규정을 준수할 것에 동의한 것으로 간주합니다.</p>
+                <a href="https://discord.com/channels/서버ID/기사지원채널ID" class="btn">기사 지원 (디스코드 연결)</a>
+            </div>
+        </section>
+
+        <section id="collab">
+            <div class="card">
+                <h1>진출 제의</h1>
+                <p>평화여객과 파트너십을 맺을 게임 제작사 및 팩션을 찾습니다.</p>
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <p>현재 <strong>Ulsan Bus Driving Simulator</strong> 주력 운행 중</p>
+                </div>
+                <a href="https://discord.com/channels/서버ID/진출제의채널ID" class="btn" style="background: var(--sub-yellow);">문의 채널로 이동</a>
+            </div>
+        </section>
     </div>
 
-    <script>
-        // Three.js 배경 효과 (VANTA.NET)
-        // 연두색 망들이 서로 연결되어 움직이는 고급스러운 연출
-        VANTA.NET({
-          el: "#vanta-bg",
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.00,
-          minWidth: 200.00,
-          scale: 1.00,
-          scaleMobile: 1.00,
-          color: 0x2ecc71, // 메인 연두색
-          backgroundColor: 0x0a0a0a, // 배경 검은색
-          points: 12.00,
-          maxDistance: 22.00,
-          spacing: 16.00
-        })
+    <div id="popup" onclick="movePage(2)">🔔 신입 기사 상시 모집 중! (클릭)</div>
 
-        // 메뉴 클릭 시 부드러운 이동 (선택사항 - 브라우저 지원용)
-        document.querySelectorAll('nav a').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+    <script>
+        // 1. 페이지 슬라이드 로직
+        const slider = document.getElementById('master-slider');
+        const navLinks = document.querySelectorAll('.nav-links li');
+
+        function movePage(index) {
+            // 화면 이동
+            slider.style.transform = `translateX(-${index * 100}vw)`;
+            
+            // 네비게이션 활성화 표시
+            navLinks.forEach((link, i) => {
+                if(i === index) link.classList.add('active');
+                else link.classList.remove('active');
             });
+        }
+
+        // 2. Three.js 배경 (연두색 그리드 파동)
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#three-canvas'), alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const geometry = new THREE.PlaneGeometry(100, 100, 40, 40);
+        const material = new THREE.MeshBasicMaterial({ color: 0x2ECC71, wireframe: true, transparent: true, opacity: 0.15 });
+        const grid = new THREE.Mesh(geometry, material);
+        grid.rotation.x = -Math.PI / 2.5;
+        grid.position.y = -10;
+        scene.add(grid);
+
+        camera.position.z = 20;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = Date.now() * 0.001;
+            const pos = grid.geometry.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                const z = Math.sin(pos.getX(i) * 0.3 + time) * 0.5;
+                pos.setZ(i, z);
+            }
+            pos.needsUpdate = true;
+            grid.rotation.z += 0.001;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 3. 팝업 노출
+        setTimeout(() => { document.getElementById('popup').classList.add('show'); }, 3000);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
 </body>
